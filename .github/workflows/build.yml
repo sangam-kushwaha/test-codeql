@@ -25,7 +25,7 @@ jobs:
     - name: Init CodeQL
       uses: github/codeql-action/init@v3
       with:
-        languages: java
+        languages: java-kotlin
         build-mode: manual
 
     - name: install JDK
@@ -42,6 +42,6 @@ jobs:
     - name: Run CodeQL
       uses: github/codeql-action/analyze@v3
       with:
-        category: "/language:java"
+        category: "/language:java-kotlin"
 
     
