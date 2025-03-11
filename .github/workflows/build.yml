@@ -37,7 +37,7 @@ jobs:
 
     - name: Build app
       run: mvn clean install -DskipTests
-      working-directory: ./
+      working-directory: ./ab
 
     - name: Run CodeQL
       uses: github/codeql-action/analyze@v3
