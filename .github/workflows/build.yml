@@ -35,9 +35,13 @@ jobs:
         distribution: 'adopt'
         cache: maven
 
-    - name: Build app
+    - name: Build app ab
       run: mvn clean install -DskipTests
       working-directory: ./ab
+
+    - name: Build app cd
+      run: mvn clean install -DskipTests
+      working-directory: ./cd
 
     - name: Run CodeQL
       uses: github/codeql-action/analyze@v3
