@@ -34,7 +34,10 @@ jobs:
   
       - name: Rollback ECS Service
         run: |
-          echo "Rolling back service ${{ matrix.service }} in cluster ${{ github.event.inputs.cluster }}"
+          service-name=demo-ecs-${{ matrix.service }}
+          cluster-name=${service-name}-cluster
+          echo "Rolling back service $service-name in cluster $cluster-name"
+          echo "command executed successfully"
           
           # # Get the current task definition
           # TASK_DEFINITION=$(aws ecs describe-services --cluster ${{ github.event.inputs.cluster }} --services ${{ matrix.service }} --query 'services[0].taskDefinition' --output text)
@@ -45,10 +48,11 @@ jobs:
           
           # # Calculate the previous revision
           # PREVIOUS_REVISION=$((CURRENT_REVISION - 1))
+          echo "current revision and previous revision
           
           # # Check if the previous revision exists
           # if aws ecs describe-task-definition --task-definition ${FAMILY}:${PREVIOUS_REVISION} >/dev/null 2>&1; then
-          #   echo "Rolling back ${{ matrix.service }} to revision ${PREVIOUS_REVISION}"
+            # echo "Rolling back ${{ matrix.service }} to revision ${PREVIOUS_REVISION}"
             
           #   # Update the service with the previous task definition
           #   aws ecs update-service --cluster ${{ github.event.inputs.cluster }} --service ${{ matrix.service }} --task-definition ${FAMILY}:${PREVIOUS_REVISION}
