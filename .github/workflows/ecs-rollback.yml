@@ -1,3 +1,4 @@
+name: rollback pipeline
 on:
   workflow_dispatch:
     inputs:
