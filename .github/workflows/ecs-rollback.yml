@@ -1,11 +1,14 @@
-name: Service Deployment
-
 on:
   workflow_dispatch:
     inputs:
-      cluster:
-        description: 'ECS Cluster Name'
+      environment:
+        description: 'Environment (e.g., dev, staging, prod)'
         required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
       service:
         description: 'ECS Service to rollback'
         required: true
@@ -17,6 +20,7 @@ on:
           - service3
           - service4
           # Add more services as needed
+
 jobs:
   rollback-service:
     runs-on: ubuntu-latest
@@ -25,40 +29,9 @@ jobs:
         service: ${{ fromJson(github.event.inputs.service == 'all' && '["service1", "service2", "service3", "service4"]' || format('[ "{0}" ]', github.event.inputs.service)) }}
 
     steps:
-      # - name: Configure AWS credentials
-      #   uses: aws-actions/configure-aws-credentials@v1
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: ${{ secrets.AWS_REGION }}
-  
       - name: Rollback ECS Service
         run: |
-          service-name=demo-ecs-${{ matrix.service }}
-          cluster-name=${service-name}-cluster
-          echo "Rolling back service $service-name in cluster $cluster-name"
+          service_name="demo-ecs-${{ matrix.service }}"
+          cluster_name="${service_name}-${{ github.event.inputs.environment }}-cluster"
+          echo "Rolling back service $service_name in cluster $cluster_name"
           echo "command executed successfully"
-          
-          # # Get the current task definition
-          # TASK_DEFINITION=$(aws ecs describe-services --cluster ${{ github.event.inputs.cluster }} --services ${{ matrix.service }} --query 'services[0].taskDefinition' --output text)
-          
-          # # Extract the family and revision
-          # FAMILY=$(echo $TASK_DEFINITION | cut -d':' -f1)
-          # CURRENT_REVISION=$(echo $TASK_DEFINITION | cut -d':' -f2)
-          
-          # # Calculate the previous revision
-          # PREVIOUS_REVISION=$((CURRENT_REVISION - 1))
-          echo "current revision and previous revision
-          
-          # # Check if the previous revision exists
-          # if aws ecs describe-task-definition --task-definition ${FAMILY}:${PREVIOUS_REVISION} >/dev/null 2>&1; then
-            # echo "Rolling back ${{ matrix.service }} to revision ${PREVIOUS_REVISION}"
-            
-          #   # Update the service with the previous task definition
-          #   aws ecs update-service --cluster ${{ github.event.inputs.cluster }} --service ${{ matrix.service }} --task-definition ${FAMILY}:${PREVIOUS_REVISION}
-            
-          #   echo "Rollback completed successfully for ${{ matrix.service }}"
-          # else
-          #   echo "Previous revision ${PREVIOUS_REVISION} not found for ${{ matrix.service }}. Rollback failed."
-          #   exit 1
-          # fi
