@@ -17,11 +17,19 @@ on:
 jobs:
   rollback:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: ${{ fromJson(github.event.inputs.service == 'all' && '["service1", "service2", "service3", "service4"]' || json.dumps([github.event.inputs.service])) }}
-      fail-fast: false
     steps:
-      - name: Rollback ECS Service
-        run: echo "Rolling back ${{ matrix.service }}"
-       
+      - name: Set up services to rollback
+        id: set_services
+        run: |
+          if [ "${{ github.event.inputs.service }}" == "all" ]; then
+            echo "::set-output name=services::service1,service2,service3,service4"
+          else
+            echo "::set-output name=services::${{ github.event.inputs.service }}"
+          fi
+
+      - name: Rollback ECS Services
+        run: |
+          for service in ${{ steps.set_services.outputs.services }}; do
+            echo "Rolling back $service"
+            # Add your ECS rollback command here
+          done
