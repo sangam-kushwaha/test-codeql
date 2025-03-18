@@ -4,29 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       deploy_scope:
-        description: 'Deployment scope (all or single)'
+        description: 'Deployment scope (all or service name)'
         required: true
-        default: 'single'
+        default: 'service1'
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - id: set-matrix
-        run: |
-          if [ "${{ github.event.inputs.deploy_scope }}" == "all" ]; then
-            echo "matrix={\"service\":[\"service1\",\"service2\",\"service3\",\"service4\"]}" >> $GITHUB_OUTPUT
-          else
-            echo "matrix={\"service\":[\"service1\"]}" >> $GITHUB_OUTPUT
-          fi
-
   deploy:
-    needs: setup
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{fromJson(needs.setup.outputs.matrix)}}
+      matrix:
+        service: ${{ fromJson(github.event.inputs.deploy_scope == 'all' && '["service1", "service2", "service3", "service4"]' || format('[ "{0}" ]', github.event.inputs.deploy_scope)) }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
