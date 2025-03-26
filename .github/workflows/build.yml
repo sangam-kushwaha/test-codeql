@@ -43,9 +43,19 @@ jobs:
       run: mvn clean install -DskipTests
       working-directory: ./cd
 
-    - name: print the artifacts
+    - name: Print available artifacts
       run: |
-          ls -l .
+        echo "Listing artifacts in the current directory:"
+        ls -R
+        
+        echo "Listing artifacts in the GITHUB_WORKSPACE directory:"
+        ls -R $GITHUB_WORKSPACE
+        
+        echo "Listing all environment variables:"
+        env
+        
+        echo "Listing contents of the GitHub Actions artifact directory:"
+        ls -R $GITHUB_WORKSPACE/artifact
 
     # - name: Run CodeQL
     #   uses: github/codeql-action/analyze@v3
