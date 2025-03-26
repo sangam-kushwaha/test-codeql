@@ -45,7 +45,7 @@ jobs:
 
     - name: print the artifacts
       run: |
-          ls -l
+          ls -l .
 
     # - name: Run CodeQL
     #   uses: github/codeql-action/analyze@v3
