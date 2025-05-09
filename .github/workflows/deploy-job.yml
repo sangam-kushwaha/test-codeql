@@ -5,40 +5,30 @@ on:
     branches: [ main ]
 
 jobs:
-  get-jobs:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v3
-      - id: set-matrix
-        run: |
-          JOBS=$(ls glue-jobs | jq -R -s -c 'split("\n")[:-1] | map({
-            job_name: ., 
-            template_path: ("glue-jobs/" + . + "/template.yaml")
-          })')
-          echo "matrix={\"include\":$JOBS}" >> $GITHUB_OUTPUT
+  # get-jobs:
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     matrix: ${{ steps.set-matrix.outputs.matrix }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - id: set-matrix
+  #       run: |
+  #         JOBS=$(ls glue-jobs | jq -R -s -c 'split("\n")[:-1] | map({
+  #           job_name: ., 
+  #           template_path: ("glue-jobs/" + . + "/template.yaml")
+  #         })')
+  #         echo "matrix={\"include\":$JOBS}" >> $GITHUB_OUTPUT
 
   deploy-dev:
-    needs: get-jobs
-    strategy:
-      matrix: ${{ fromJson(needs.get-jobs.outputs.matrix) }}
-    uses: ./.github/workflows/reusable-cfn-deploy.yml
-    with:
-      environment: dev
-      region: us-east-1
-      template_path: ${{ matrix.template_path }}
-      stack_name: dev-${{ matrix.job_name }}
-    secrets: inherit
+      strategy:
+        matrix:
+          file: [glue-jobs/**/*.yml]  # Create a 'file' key with the glob pattern
+      uses: ./.github/workflows/reusable-cfn-deploy.yml
+      with:
+        environment: dev
+        region: us-east-1
+        template_path: ${{ matrix.file }}
+        stack_name: dev-${{ matrix.file.basename }}  # Or another way to extract job name
+      secrets: inherit
 
-  deploy-prod:
-    needs: [get-jobs, deploy-dev]
-    strategy:
-      matrix: ${{ fromJson(needs.get-jobs.outputs.matrix) }}
-    uses: ./.github/workflows/reusable-cfn-deploy.yml
-    with:
-      environment: prod
-      region: us-east-1
-      template_path: ${{ matrix.template_path }}
-      stack_name: prod-${{ matrix.job_name }}
-    secrets: inherit
+
