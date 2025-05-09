@@ -29,9 +29,7 @@ jobs:
       region: us-east-1
       template_path: ${{ matrix.template_path }}
       stack_name: dev-${{ matrix.job_name }}
-    secrets:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    secrets: inherit
 
   deploy-prod:
     needs: [get-jobs, deploy-dev]
@@ -43,8 +41,6 @@ jobs:
       region: us-east-1
       template_path: ${{ matrix.template_path }}
       stack_name: prod-${{ matrix.job_name }}
-    secrets:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    secrets: inherit
 
 
