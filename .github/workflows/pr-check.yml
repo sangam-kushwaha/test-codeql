@@ -32,5 +32,5 @@ jobs:
       - name: Run CloudFormation Linting
         run: |
           echo "Checking CloudFormation templates in PR from ${{ github.head_ref }} to main branch"
-          cfn-lint **/*.{yaml,yml,json}
+          cfn-lint $(find . -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \))
         continue-on-error: false
