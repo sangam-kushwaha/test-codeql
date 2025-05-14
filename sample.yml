@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Template with intentional errors for cfn-lint testing
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: dev
+    # Missing AllowedValues for environment
+
+Resources:
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      # Missing required BucketName property
+      Tags:
+        - key: Environment    # Should be 'Key' (capital K)
+          value: !Ref EnvironmentName    # Should be 'Value' (capital V)
+
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro    # Should use parameter or be from valid list
+      ImageId: ami-12345678    # Invalid AMI ID format
+      SecurityGroups:    # Should use SecurityGroupIds instead
+        - !Ref MySecurity
+      Tags:
+        - Key: Name
+          Value: MyInstance
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  MySecurity:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0    # Too permissive, will fail security best practices
+      VpcId: vpc-12345    # Invalid VPC ID format
+
+Outputs:
+  BucketName:
+    Description: Name of the created bucket
+    Value: !Ref MyS3Bucket
+    Export:    # Missing required Name property in Export
