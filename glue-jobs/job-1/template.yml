@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation template to create an S3 bucket and IAM role'
+
+Parameters:
+  # BucketName:
+  #   Type: String
+  #   Description: 'Name of the S3 bucket to create'
+  #   Default: 'my-s3-bucket-stack-1'
+  RoleName:
+    Type: String
+    Description: 'Name of the IAM role to create'
+    Default: 'my-iam-role-stack-1'
+
+Resources:
+  # MyS3Bucket:
+  #   Type: 'AWS::S3::Bucket'
+  #   Properties:
+  #     BucketName: !Ref BucketName
+  #     VersioningConfiguration:
+  #       Status: Enabled
+  #     BucketEncryption:
+  #       ServerSideEncryptionConfiguration:
+  #         - ServerSideEncryptionByDefault:
+  #             SSEAlgorithm: AES256
+
+  MyIAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Ref RoleName
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: S3AccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                  - 's3:ListBucket'
+                Resource: "*"
+                  # - !Sub 'arn:aws:s3:::${MyS3Bucket}'
+                  # - !Sub 'arn:aws:s3:::${MyS3Bucket}/*'
+
+Outputs:
+  # BucketName:
+  #   Description: 'Name of the created S3 bucket'
+  #   Value: !Ref MyS3Bucket
+  # BucketARN:
+  #   Description: 'ARN of the created S3 bucket'
+  #   Value: !GetAtt MyS3Bucket.Arn
+  RoleName:
+    Description: 'Name of the created IAM role'
+    Value: !Ref MyIAMRole
+  RoleARN:
+    Description: 'ARN of the created IAM role'
+    Value: !GetAtt MyIAMRole.Arn
