@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Template with different types of errors for cfn-lint testing
+
+Parameters:
+  Environment:
+    Type: String
+    # Missing AllowedValues and Default value
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16   # Valid CIDR
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          value: MyVPC    # Should be 'Value' (capital V)
+
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      # Missing required VpcId
+      CidrBlock: 10.0.0.0/24
+      AvailabilityZone: us-east-1   # Invalid AZ format
+
+  RDSInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceClass: db.t3.micro
+      Engine: mysql
+      # Missing required MasterUsername and MasterUserPassword
+      AllocatedStorage: "20"    # Should be number, not string
+      PubliclyAccessible: true  # Security best practice violation
+      Tags:
+        - key: Environment     # Should be 'Key' (capital K)
+          Value: !Ref Environment
+
+  IAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      # Missing required RoleName or Path
+      Policies:
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - s3:*        # Too permissive
+                Resource: "*"   # Too permissive
+
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      # Missing BucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false     # Security best practice violation
+        BlockPublicPolicy: false   # Security best practice violation
+      VersioningConfiguration:
+        Status: Enable    # Should be 'Enabled'
+
+Outputs:
+  VPCId:
+    Description: VPC ID
+    Value: !Ref VPC
+    Export:      # Missing required Name property in Export
