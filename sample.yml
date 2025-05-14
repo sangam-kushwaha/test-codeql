@@ -1,47 +1,91 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Template with intentional errors for cfn-lint testing
+Description: Fixed template following CloudFormation best practices
 
 Parameters:
   EnvironmentName:
     Type: String
     Default: dev
-    # Missing AllowedValues for environment
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Environment name for resource tagging and naming
+
+  InstanceTypeParameter:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+    Description: EC2 instance type
+
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC where resources will be created
+
+  AllowedSSHCidr:
+    Type: String
+    Default: 10.0.0.0/16
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    Description: CIDR block for SSH access
 
 Resources:
   MyS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      # Missing required BucketName property
+      BucketName: !Sub "${AWS::StackName}-${EnvironmentName}-bucket"
       Tags:
-        - key: Environment    # Should be 'Key' (capital K)
-          value: !Ref EnvironmentName    # Should be 'Value' (capital V)
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: Stack
+          Value: !Ref AWS::StackName
+    DeletionPolicy: Retain
 
   MyEC2Instance:
     Type: AWS::EC2::Instance
     Properties:
-      InstanceType: t2.micro    # Should use parameter or be from valid list
-      ImageId: ami-12345678    # Invalid AMI ID format
-      SecurityGroups:    # Should use SecurityGroupIds instead
+      InstanceType: !Ref InstanceTypeParameter
+      ImageId: !Sub '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2}}'
+      SecurityGroupIds:
         - !Ref MySecurity
       Tags:
         - Key: Name
-          Value: MyInstance
+          Value: !Sub "${AWS::StackName}-instance"
         - Key: Environment
           Value: !Ref EnvironmentName
 
   MySecurity:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Allow SSH
+      GroupDescription: Allow SSH access from specified CIDR
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-          CidrIp: 0.0.0.0/0    # Too permissive, will fail security best practices
-      VpcId: vpc-12345    # Invalid VPC ID format
+          CidrIp: !Ref AllowedSSHCidr
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-sg"
+        - Key: Environment
+          Value: !Ref EnvironmentName
 
 Outputs:
   BucketName:
-    Description: Name of the created bucket
+    Description: Name of the created S3 bucket
     Value: !Ref MyS3Bucket
-    Export:    # Missing required Name property in Export
+    Export:
+      Name: !Sub "${AWS::StackName}-BucketName"
+
+  InstanceId:
+    Description: ID of the created EC2 instance
+    Value: !Ref MyEC2Instance
+    Export:
+      Name: !Sub "${AWS::StackName}-InstanceId"
+
+  SecurityGroupId:
+    Description: ID of the created Security Group
+    Value: !Ref MySecurity
+    Export:
+      Name: !Sub "${AWS::StackName}-SecurityGroupId"
