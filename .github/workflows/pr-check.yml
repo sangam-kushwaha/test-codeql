@@ -28,16 +28,22 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install cfn-lint
-
-      - name: Run CloudFormation Linting
+      - name: Run cfn-lint
         run: |
-          echo "Checking CloudFormation templates in PR from ${{ github.head_ref }} to main branch"
-          files=$(find . -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) -not -path "./.github/*")
-          echo "Files to be scanned:"
-          echo "$files"
-          echo "-------------------"
-          cfn-lint $files
+          cfn-lint .
         continue-on-error: false
+
+        
+
+      # - name: Run CloudFormation Linting
+      #   run: |
+      #     echo "Checking CloudFormation templates in PR from ${{ github.head_ref }} to main branch"
+      #     files=$(find . -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) -not -path "./.github/*")
+      #     echo "Files to be scanned:"
+      #     echo "$files"
+      #     echo "-------------------"
+      #     cfn-lint $files
+      #   continue-on-error: false
 
   cfn-nag:
     name: CFN Nag Scan
