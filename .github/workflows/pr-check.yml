@@ -56,14 +56,20 @@ jobs:
         run: |
           gem install cfn-nag
 
-      - name: Run CFN Nag Scan
-        run: |
-          echo "Running CFN Nag scan on templates from ${{ github.head_ref }} to main branch"
-          files=$(find . -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) -not -path "./.github/*")
-          echo "Files to be scanned:"
-          echo "$files"
-          cfn_nag_scan --input-path $files
-        continue-on-error: false
+      - name: Run CFN-Nag
+        uses: stelligent/cfn_nag@master
+        with:
+          input_path: .
+          extra_args: --fail-on-warnings
+
+      # - name: Run CFN Nag Scan
+      #   run: |
+      #     echo "Running CFN Nag scan on templates from ${{ github.head_ref }} to main branch"
+      #     files=$(find . -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) -not -path "./.github/*")
+      #     echo "Files to be scanned:"
+      #     echo "$files"
+      #     cfn_nag_scan --input-path $files
+      #   continue-on-error: false
 
 
 
