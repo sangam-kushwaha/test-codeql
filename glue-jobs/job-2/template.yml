@@ -52,9 +52,9 @@ Outputs:
   # BucketName:
   #   Description: 'Name of the created S3 bucket'
   #   Value: !Ref MyS3Bucket
-  # BucketARN:
-  #   Description: 'ARN of the created S3 bucket'
-  #   Value: !GetAtt MyS3Bucket.Arn
+  BucketARN:
+    Description: 'ARN of the created S3 bucket'
+    Value: !GetAtt MyS3Bucket.Arn
   RoleName:
     Description: 'Name of the created IAM role'
     Value: !Ref MyIAMRole
