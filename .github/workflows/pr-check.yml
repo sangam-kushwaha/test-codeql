@@ -30,7 +30,7 @@ jobs:
           pip install cfn-lint
       - name: Run cfn-lint
         run: |
-          cfn-lint "**/*.yml"
+          cfn-lint "**/*.yml" "**/*.yaml"
         continue-on-error: false
 
         
