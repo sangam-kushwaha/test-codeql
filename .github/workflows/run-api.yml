@@ -1,4 +1,4 @@
-name: List CodeQL Analyses
+name: List CodeQL Analyses Demo
 
 on:
   workflow_dispatch:  # This allows manual triggering
